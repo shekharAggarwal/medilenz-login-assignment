@@ -38,6 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
           builder: (context, state) {
             if (state is OTPSent) {
               WidgetsBinding.instance!.addPostFrameCallback((_) {
+                Navigator.pop(context);
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -46,8 +47,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             )));
               });
             }
-            if (state is LoginFailed) {}
-            if (state is LoginLoading) {}
+            if (state is LoginFailed) {
+              WidgetsBinding.instance!.addPostFrameCallback((_) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text("Failed to send OTP Try Again!")));
+              });
+              }
+            if (state is LoginLoading) {
+              WidgetsBinding.instance!.addPostFrameCallback((_) {
+                showLoaderDialog(context);
+              });
+            }
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -68,6 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () {
                     if (_controller.text.isNotEmpty &&
                         _controller.text.length == 10) {
+                      _loginCubit.sendOtp(_controller.text);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text("Enter Phone Number")));
@@ -80,6 +92,27 @@ class _LoginScreenState extends State<LoginScreen> {
           },
         ),
       ),
+    );
+  }
+
+  showLoaderDialog(BuildContext context) {
+    AlertDialog alert = AlertDialog(
+      content: Row(
+        children: [
+          const CircularProgressIndicator(),
+          Container(
+            margin: const EdgeInsets.only(left: 15),
+            child: const Text("Loading..."),
+          ),
+        ],
+      ),
+    );
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return WillPopScope(onWillPop: () async => false, child: alert);
+      },
     );
   }
 }

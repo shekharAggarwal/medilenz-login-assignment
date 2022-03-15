@@ -1,0 +1,1 @@
+class WrongOTPException implements Exception {}

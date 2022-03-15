@@ -1,9 +1,11 @@
 import '../core/api_client.dart';
+import '../core/wrong_otp_exception.dart';
+import '../models/login_model.dart';
 
 abstract class RemoteDataSource {
   Future<bool> sendOTP(String phone);
 
-  Future<bool> verifyOTP(String phone, String otp);
+  Future<LoginModel> verifyOTP(String phone, String otp);
 }
 
 class RemoteDataSourceImpl extends RemoteDataSource {
@@ -22,12 +24,15 @@ class RemoteDataSourceImpl extends RemoteDataSource {
   }
 
   @override
-  Future<bool> verifyOTP(String phone, String otp) async {
+  Future<LoginModel> verifyOTP(String phone, String otp) async {
     try {
-      await _client.post("/user/otp_login",
+      final res = await _client.post("/user/otp_login",
           params: {"otp": otp}, urlParams: {"phone": phone});
-      return true;
+      return LoginModel.fromJson(res);
     } catch (e) {
+      if (e.toString().compareTo("Exception: OTP is wrong/expired") == 0) {
+        throw WrongOTPException();
+      }
       rethrow;
     }
   }

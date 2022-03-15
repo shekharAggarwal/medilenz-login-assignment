@@ -13,7 +13,13 @@ class LoginLoading extends LoginState {}
 
 class OTPSent extends LoginState {}
 
-class OTPVerified extends LoginState {}
+class InvalidOTP extends LoginState {}
+
+class OTPVerified extends LoginState {
+  final LoginEntity loginEntity;
+
+  const OTPVerified(this.loginEntity);
+}
 
 class LoginFailed extends LoginState {
   final AppErrorType errorType;
